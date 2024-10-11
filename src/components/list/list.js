@@ -17,7 +17,7 @@ export function CurrencyConverterList({ options, value }) {
 }
 
 CurrencyConverterList.propTypes = {
-  value: PropTypes.number.isRequired,
+  value: PropTypes.string.isRequired,
   options: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
 

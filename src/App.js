@@ -3,38 +3,37 @@ import React, {
   useCallback,
   useState,
   useMemo,
-  useRef,
 } from 'react';
 
 import { CurrencyConverterTitle } from './components/title/title';
 import { CurrencyConverterText } from './components/text/text';
 import { CurrencyConverter } from './components/converter/converter';
 import { CurrencyConverterList } from './components/list/list';
+import { CurrencyConverterSelectItem } from './components/converter/select/selectItem/selectItem';
 import { getTicker } from './services/converterService';
 import { useCachedRequestDataFetch } from './data/customHooks/useCachedRequestDataFetch';
+import useHandleInputOnChange from './components/converter/input/customHooks/useHandleInputOnChange';
 
 import logo from './logo.svg';
 import './App.css';
 
 const DEFAULT_CURRENCY_CODE = 'USD';
-const NR_OF_CURRENCIES = 20;
+const NR_OF_CURRENCIES = 10;
 const CACHE_KEY = 'cachedCurrencies';
-const CACHE_TIMEOUT = 5000;
-const INPUT_DEBOUCE_TIME = 500;
+const CACHE_TIMEOUT = 50000;
+// const INPUT_DEBOUCE_TIME = 500;
 
 function App() {
   const [currencies, setCurrencies] = useState([]);
   const [shuffledCurrencies, setShuffledCurrencies] = useState([]);
   const [defaultCurrencyValue, setDefaultCurrencyValue] = useState();
   const [currencyValue, setCurrencyValue] = useState();
-  const [inputValue, setInputValue] = useState(0);
+
+  const { value: inputValue, onChange: onInputChange } = useHandleInputOnChange();
 
   const doFetch = useCallback(
     (value) => getTicker(value || DEFAULT_CURRENCY_CODE)
-      .then((res) => {
-        console.table(res);
-        return res;
-      })
+      .then((res) => res)
       .catch((err) => Promise.reject(err)),
     [],
   );
@@ -52,18 +51,6 @@ function App() {
     [doRequest],
   );
 
-  // const fetchTicker = useCallback(
-  //   () => getTicker()
-  //     .then((res) => {~
-
-  //       setCurrencies(res);
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     }),
-  //   [],
-  // );
-
   const currenciesValues = useMemo(() => {
     if (!currencies || currencies.length === 0) {
       return [];
@@ -73,11 +60,36 @@ function App() {
 
     const pairedValues = values.map((item) => ({
       value: item,
-      label: item,
+      label: (
+        <CurrencyConverterSelectItem key={item}>
+          {item}
+        </CurrencyConverterSelectItem>
+      ),
     }));
 
     return pairedValues;
   }, [currencies]);
+
+  const getShuffledCurrencies = useCallback(
+    () => currencies
+      .filter(
+        ({ currency }) => currency !== (currencyValue || DEFAULT_CURRENCY_CODE),
+      )
+      .map((value) => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value)
+      .slice(0, NR_OF_CURRENCIES),
+
+    [currencies, currencyValue],
+  );
+
+  const onSelectChange = useCallback(
+    ({ value }) => {
+      setCurrencyValue(value);
+      fetchCurrencies(value);
+    },
+    [fetchCurrencies],
+  );
 
   useEffect(() => {
     setDefaultCurrencyValue((prevValue) => {
@@ -92,83 +104,13 @@ function App() {
     return () => {};
   }, [currenciesValues]);
 
-  // const options = [
-  //   { value: 'chocolate', label: 'Chocolate' },
-  //   {
-  //     value: 'strawberry',
-  //     label: (
-  //       <>
-  //         <span style={{ paddingRight: '5px' }}>Strawberry</span>
-  //         <img
-  //           id="icon"
-  //           src="https://cdn4.iconfinder.com/data/icons/basic-user-interface-elements/700/copy-duplicate-multiply-clone-512.png"
-  //           alt="icon"
-  //         />
-  //       </>
-  //     ),
-  //   },
-  //   { value: 'vanilla', label: 'Vanilla' },
-  // ];
-
-  // console.table(currencies);
-  // console.table(defaultCurrencyValue);
-
-  // RP FIXME -> must be only current currency pair values
-  const getShuffledCurrencies = useCallback(() => {
-    const temp = currencies.filter(
-      ({ currency }) => currency !== (currencyValue || DEFAULT_CURRENCY_CODE),
-    );
-
-    console.log(temp.length);
-
-    return temp
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value)
-      .slice(0, NR_OF_CURRENCIES);
-  }, [currencies, currencyValue]);
-
   useEffect(() => {
-    setShuffledCurrencies(getShuffledCurrencies());
+    if (currenciesValues.length > 0) {
+      setShuffledCurrencies(getShuffledCurrencies());
+    }
 
     return () => {};
   }, [currenciesValues, getShuffledCurrencies]);
-
-  useEffect(() => () => {}, [shuffledCurrencies]);
-
-  const onSelectChange = useCallback(
-    ({ value }) => {
-      // setDefaultCurrencyValue(()=> {
-      //   currencies.forEach(element => {
-      //     if(element.currency)
-      //   });
-      // })
-      setCurrencyValue(value);
-      fetchCurrencies(value);
-    },
-    [fetchCurrencies],
-  );
-
-  const debounceIdRef = useRef();
-
-  const handleOnChange = useCallback((event) => {
-    setInputValue(event.target.value);
-
-    // call calculations
-  }, []);
-
-  const onInputChange = useCallback(
-    (event, changeTo) => {
-      if (debounceIdRef.current) {
-        clearTimeout(debounceIdRef.current);
-      }
-
-      debounceIdRef.current = setTimeout(() => {
-        handleOnChange(event, changeTo);
-      }, INPUT_DEBOUCE_TIME);
-    },
-    [handleOnChange],
-  );
 
   useEffect(() => {
     fetchCurrencies();
@@ -181,7 +123,7 @@ function App() {
       <header className="app__header">
         <img src={logo} className="app__logo" alt="logo" />
       </header>
-      <div className="app_content">
+      <div className="app__content">
         <CurrencyConverterTitle>Currency Converter</CurrencyConverterTitle>
         <CurrencyConverterText>
           Receive competitive and transparent pricing with no hidden spreads.
@@ -193,18 +135,17 @@ function App() {
           onInputChange={onInputChange}
           onSelectChange={onSelectChange}
         />
-        {inputValue ? (
+        {!!inputValue && (
           <CurrencyConverterList
             options={shuffledCurrencies}
             value={inputValue}
           />
-        ) : (
+        )}
+        {!inputValue && defaultCurrencyValue && (
           <CurrencyConverterText className="app__text">
             Enter an amount to check the rates.
           </CurrencyConverterText>
         )}
-        <pre>{JSON.stringify(shuffledCurrencies, null, 2)}</pre>
-        <pre>{inputValue}</pre>
       </div>
     </div>
   );

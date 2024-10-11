@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { CurrencyConverterSelectItem } from '../../converter/select/selectItem/selectItem';
 
 import './listItem.css';
+
+const FLOAT = 6;
 
 export function CurrencyConverterListItem({ children, currency }) {
   return (
     <li className="a-currencyConverterListItem">
-      <span>{parseFloat(children.toFixed(6))}</span>
-      <span>{currency}</span>
+      <span>{parseFloat(children.toFixed(FLOAT))}</span>
+      <CurrencyConverterSelectItem>{currency}</CurrencyConverterSelectItem>
     </li>
   );
 }

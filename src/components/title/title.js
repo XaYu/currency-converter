@@ -5,9 +5,9 @@ import './title.css';
 
 export function CurrencyConverterTitle({ children }) {
   return (
-    <h3 className="m-currencyConverterTitle">
+    <h1 className="m-currencyConverterTitle">
       {children}
-    </h3>
+    </h1>
   );
 }
 

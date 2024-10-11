@@ -1,42 +1,37 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
-import Select from 'react-select';
+import { CurrencyConverterInput } from './input/input';
+import { CurrencyConverterSelect } from './select/select';
 
 import './converter.css';
 
 export function CurrencyConverter({
   selectDefaultValue,
-  selectOptions,
+  selectOptions = [],
   onSelectChange,
   onInputChange,
 }) {
   return (
     <div className="m-currencyConverter">
-      <input
-        type="text"
-        name="inputValue"
-        onChange={onInputChange}
-        className="a-currencyConverter__input"
-      />
-      {selectOptions && selectOptions.length > 0 && selectDefaultValue && (
-        <Select
-          defaultValue={selectDefaultValue}
-          name="currencyValue"
-          options={selectOptions}
-          onChange={onSelectChange}
-          className="a-currencyConverter__select"
-        />
+      {selectOptions.length > 0 && selectDefaultValue && (
+        <>
+          <CurrencyConverterInput onChange={onInputChange} />
+          <CurrencyConverterSelect
+            defaultValue={selectDefaultValue}
+            options={selectOptions}
+            onChange={onSelectChange}
+          />
+        </>
       )}
     </div>
   );
 }
 
 CurrencyConverter.propTypes = {
-  selectDefaultValue: PropTypes.string.isRequired,
+  selectDefaultValue: PropTypes.shape({}),
   onInputChange: PropTypes.func.isRequired,
   onSelectChange: PropTypes.func.isRequired,
-  selectOptions: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  selectOptions: PropTypes.arrayOf(PropTypes.shape({})),
 };
 
 export default CurrencyConverter;
