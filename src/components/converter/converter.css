@@ -1,0 +1,12 @@
+.m-currencyConverter {
+  display: flex;
+}
+
+.a-currencyConverter__input {
+  flex: 1;
+}
+
+.a-currencyConverter__select {
+  text-align: left;
+  flex-basis: 120px;
+}
