@@ -1,0 +1,98 @@
+{
+  "name": "currency-converter",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@uphold/uphold-sdk-javascript": "^2.4.0",
+    "classnames": "^2.5.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "prop-types": "^15.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1",
+    "react-select": "^5.8.1"
+  },
+  "devDependencies": {
+    "@uphold/uphold-sdk-javascript": "^2.4.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "prop-types": "^15.8.1",
+    "classnames": "^2.5.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "parser": "@babel/eslint-parser",
+    "extends": [
+      "react-app",
+      "react-app/jest",
+      "airbnb"
+    ],
+    "env": {
+      "browser": true,
+      "es6": true,
+      "node": true,
+      "jest": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "defaultParams": true
+      }
+    },
+    "plugins": [
+      "react-hooks"
+    ],
+    "rules": {
+      "react/jsx-filename-extension": 0,
+      "react/sort-comp": 0,
+      "linebreak-style": 0,
+      "react/destructuring-assignment": [
+        "warn",
+        "always",
+        {
+          "ignoreClassFields": true
+        }
+      ],
+      "max-len": 0,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "jsx-a11y/control-has-associated-label": 0,
+      "react/require-default-props": 0,
+      "react/forbid-prop-types": 0
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier-eslint --write",
+      "git add"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
