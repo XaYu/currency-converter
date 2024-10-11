@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import { CurrencyConverterTitle } from './components/title/title';
@@ -8,6 +8,7 @@ import { CurrencyConverterList } from './components/list/list';
 import { useFetchCurrencies } from './customHooks/useFetchCurrencies';
 import { useHandleCurrencies } from './customHooks/useHandleCurrencies';
 import useHandleInputOnChange from './components/converter/input/customHooks/useHandleInputOnChange';
+import useHandleSelectOnChange from './components/converter/select/customHooks/useHandleSelectOnChange';
 
 import logo from './logo.svg';
 import './App.css';
@@ -75,12 +76,9 @@ function App() {
 
   const { value: inputValue, onChange: onInputChange } = useHandleInputOnChange();
 
-  const onSelectChange = useCallback(
-    ({ value }) => {
-      setCurrencyValue(value);
-      fetchCurrencies(value);
-    },
-    [fetchCurrencies, setCurrencyValue],
+  const { onChange: onSelectChange } = useHandleSelectOnChange(
+    setCurrencyValue,
+    fetchCurrencies,
   );
 
   return (
