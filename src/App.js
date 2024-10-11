@@ -1,8 +1,5 @@
 import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
+  useEffect, useCallback, useState, useMemo,
 } from 'react';
 
 import { CurrencyConverterTitle } from './components/title/title';
@@ -10,8 +7,7 @@ import { CurrencyConverterText } from './components/text/text';
 import { CurrencyConverter } from './components/converter/converter';
 import { CurrencyConverterList } from './components/list/list';
 import { CurrencyConverterSelectItem } from './components/converter/select/selectItem/selectItem';
-import { getTicker } from './services/converterService';
-import { useCachedRequestDataFetch } from './data/customHooks/useCachedRequestDataFetch';
+import { useFetchCurrencies } from './customHooks/useFetchCurrencies';
 import useHandleInputOnChange from './components/converter/input/customHooks/useHandleInputOnChange';
 
 import logo from './logo.svg';
@@ -19,37 +15,35 @@ import './App.css';
 
 const DEFAULT_CURRENCY_CODE = 'USD';
 const NR_OF_CURRENCIES = 10;
-const CACHE_KEY = 'cachedCurrencies';
-const CACHE_TIMEOUT = 50000;
-// const INPUT_DEBOUCE_TIME = 500;
 
 function App() {
-  const [currencies, setCurrencies] = useState([]);
+  // const [currencies, setCurrencies] = useState([]);
   const [shuffledCurrencies, setShuffledCurrencies] = useState([]);
   const [defaultCurrencyValue, setDefaultCurrencyValue] = useState();
   const [currencyValue, setCurrencyValue] = useState();
 
+  const { currencies, fetchCurrencies } = useFetchCurrencies();
   const { value: inputValue, onChange: onInputChange } = useHandleInputOnChange();
 
-  const doFetch = useCallback(
-    (value) => getTicker(value || DEFAULT_CURRENCY_CODE)
-      .then((res) => res)
-      .catch((err) => Promise.reject(err)),
-    [],
-  );
+  // const doFetch = useCallback(
+  //   (value) => getTicker(value || DEFAULT_CURRENCY_CODE)
+  //     .then((res) => res)
+  //     .catch((err) => Promise.reject(err)),
+  //   [],
+  // );
 
-  const { doRequest } = useCachedRequestDataFetch(
-    doFetch,
-    CACHE_KEY,
-    CACHE_TIMEOUT,
-  );
+  // const { doRequest } = useCachedRequestDataFetch(
+  //   doFetch,
+  //   CACHE_KEY,
+  //   CACHE_TIMEOUT,
+  // );
 
-  const fetchCurrencies = useCallback(
-    (value) => {
-      doRequest(value).then((res) => setCurrencies(res));
-    },
-    [doRequest],
-  );
+  // const fetchCurrencies = useCallback(
+  //   (value) => {
+  //     doRequest(value).then((res) => setCurrencies(res));
+  //   },
+  //   [doRequest],
+  // );
 
   const currenciesValues = useMemo(() => {
     if (!currencies || currencies.length === 0) {
