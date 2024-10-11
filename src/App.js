@@ -1,117 +1,27 @@
-import React, {
-  useEffect, useCallback, useState, useMemo,
-} from 'react';
+import React, { useCallback } from 'react';
+import PropTypes from 'prop-types';
 
 import { CurrencyConverterTitle } from './components/title/title';
 import { CurrencyConverterText } from './components/text/text';
 import { CurrencyConverter } from './components/converter/converter';
 import { CurrencyConverterList } from './components/list/list';
-import { CurrencyConverterSelectItem } from './components/converter/select/selectItem/selectItem';
 import { useFetchCurrencies } from './customHooks/useFetchCurrencies';
+import { useHandleCurrencies } from './customHooks/useHandleCurrencies';
 import useHandleInputOnChange from './components/converter/input/customHooks/useHandleInputOnChange';
 
 import logo from './logo.svg';
 import './App.css';
 
 const DEFAULT_CURRENCY_CODE = 'USD';
-const NR_OF_CURRENCIES = 10;
 
-function App() {
-  // const [currencies, setCurrencies] = useState([]);
-  const [shuffledCurrencies, setShuffledCurrencies] = useState([]);
-  const [defaultCurrencyValue, setDefaultCurrencyValue] = useState();
-  const [currencyValue, setCurrencyValue] = useState();
-
-  const { currencies, fetchCurrencies } = useFetchCurrencies();
-  const { value: inputValue, onChange: onInputChange } = useHandleInputOnChange();
-
-  // const doFetch = useCallback(
-  //   (value) => getTicker(value || DEFAULT_CURRENCY_CODE)
-  //     .then((res) => res)
-  //     .catch((err) => Promise.reject(err)),
-  //   [],
-  // );
-
-  // const { doRequest } = useCachedRequestDataFetch(
-  //   doFetch,
-  //   CACHE_KEY,
-  //   CACHE_TIMEOUT,
-  // );
-
-  // const fetchCurrencies = useCallback(
-  //   (value) => {
-  //     doRequest(value).then((res) => setCurrencies(res));
-  //   },
-  //   [doRequest],
-  // );
-
-  const currenciesValues = useMemo(() => {
-    if (!currencies || currencies.length === 0) {
-      return [];
-    }
-
-    const values = [...new Set(currencies.map((item) => item.currency))];
-
-    const pairedValues = values.map((item) => ({
-      value: item,
-      label: (
-        <CurrencyConverterSelectItem key={item}>
-          {item}
-        </CurrencyConverterSelectItem>
-      ),
-    }));
-
-    return pairedValues;
-  }, [currencies]);
-
-  const getShuffledCurrencies = useCallback(
-    () => currencies
-      .filter(
-        ({ currency }) => currency !== (currencyValue || DEFAULT_CURRENCY_CODE),
-      )
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value)
-      .slice(0, NR_OF_CURRENCIES),
-
-    [currencies, currencyValue],
-  );
-
-  const onSelectChange = useCallback(
-    ({ value }) => {
-      setCurrencyValue(value);
-      fetchCurrencies(value);
-    },
-    [fetchCurrencies],
-  );
-
-  useEffect(() => {
-    setDefaultCurrencyValue((prevValue) => {
-      if (currenciesValues.length > 0 && !prevValue) {
-        return currenciesValues.find(
-          ({ value }) => value === DEFAULT_CURRENCY_CODE,
-        );
-      }
-      return prevValue;
-    });
-
-    return () => {};
-  }, [currenciesValues]);
-
-  useEffect(() => {
-    if (currenciesValues.length > 0) {
-      setShuffledCurrencies(getShuffledCurrencies());
-    }
-
-    return () => {};
-  }, [currenciesValues, getShuffledCurrencies]);
-
-  useEffect(() => {
-    fetchCurrencies();
-
-    return () => {};
-  }, [fetchCurrencies]);
-
+function AppComponent({
+  inputValue,
+  selectDefaultValue,
+  selectOptions,
+  listOptions,
+  onInputChange,
+  onSelectChange,
+}) {
   return (
     <div className="app">
       <header className="app__header">
@@ -124,24 +34,64 @@ function App() {
           See how we compare.
         </CurrencyConverterText>
         <CurrencyConverter
-          selectDefaultValue={defaultCurrencyValue}
-          selectOptions={currenciesValues}
+          selectDefaultValue={selectDefaultValue}
+          selectOptions={selectOptions}
           onInputChange={onInputChange}
           onSelectChange={onSelectChange}
         />
         {!!inputValue && (
-          <CurrencyConverterList
-            options={shuffledCurrencies}
-            value={inputValue}
-          />
+          <CurrencyConverterList options={listOptions} value={inputValue} />
         )}
-        {!inputValue && defaultCurrencyValue && (
+        {!inputValue && selectDefaultValue && (
           <CurrencyConverterText className="app__text">
             Enter an amount to check the rates.
           </CurrencyConverterText>
         )}
       </div>
     </div>
+  );
+}
+
+AppComponent.propTypes = {
+  inputValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  selectDefaultValue: PropTypes.shape({}),
+  onInputChange: PropTypes.func.isRequired,
+  onSelectChange: PropTypes.func.isRequired,
+  selectOptions: PropTypes.arrayOf(PropTypes.shape({})),
+  listOptions: PropTypes.arrayOf(PropTypes.shape({})),
+};
+
+function App() {
+  const { currencies, fetchCurrencies } = useFetchCurrencies(
+    DEFAULT_CURRENCY_CODE,
+  );
+
+  const {
+    currenciesValues,
+    setCurrencyValue,
+    shuffledCurrencies,
+    defaultCurrencyValue,
+  } = useHandleCurrencies(currencies, DEFAULT_CURRENCY_CODE);
+
+  const { value: inputValue, onChange: onInputChange } = useHandleInputOnChange();
+
+  const onSelectChange = useCallback(
+    ({ value }) => {
+      setCurrencyValue(value);
+      fetchCurrencies(value);
+    },
+    [fetchCurrencies, setCurrencyValue],
+  );
+
+  return (
+    <AppComponent
+      inputValue={inputValue}
+      selectDefaultValue={defaultCurrencyValue}
+      selectOptions={currenciesValues}
+      listOptions={shuffledCurrencies}
+      onInputChange={onInputChange}
+      onSelectChange={onSelectChange}
+    />
   );
 }
 

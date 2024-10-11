@@ -1,20 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 
 import { getTicker } from '../services/converterService';
 import { useCachedRequestDataFetch } from '../data/customHooks/useCachedRequestDataFetch';
 
-const DEFAULT_CURRENCY_CODE = 'USD';
 const CACHE_KEY = 'cachedCurrencies';
 const CACHE_TIMEOUT = 50000;
 
-export const useFetchCurrencies = () => {
+export const useFetchCurrencies = (defaultCurrencyCode) => {
   const [currencies, setCurrencies] = useState([]);
 
   const doFetch = useCallback(
-    (value) => getTicker(value || DEFAULT_CURRENCY_CODE)
+    (value) => getTicker(value || defaultCurrencyCode)
       .then((res) => res)
       .catch((err) => Promise.reject(err)),
-    [],
+    [defaultCurrencyCode],
   );
 
   const { doRequest } = useCachedRequestDataFetch(
@@ -29,6 +28,12 @@ export const useFetchCurrencies = () => {
     },
     [doRequest],
   );
+
+  useEffect(() => {
+    fetchCurrencies();
+
+    return () => {};
+  }, [fetchCurrencies]);
 
   return { currencies, fetchCurrencies };
 };
